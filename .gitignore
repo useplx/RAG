@@ -1,0 +1,14 @@
+build/
+build-*/
+target/
+checkpoints/
+*.o
+*.a
+*.so
+*.mln
+*.vmfb
+*.irpa
+*.safetensors
+*.gguf
+.cache/
+*.zip

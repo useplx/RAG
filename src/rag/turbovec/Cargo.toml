@@ -1,0 +1,19 @@
+[package]
+name = "turbovec-myelin"
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.89"
+publish = false
+
+[lib]
+name = "turbovec_myelin"
+crate-type = ["staticlib"]
+
+[dependencies]
+turbovec = { path = "../../../third_party/turbovec/turbovec" }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"

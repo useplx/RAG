@@ -1,0 +1,59 @@
+[package]
+name = "rag"
+version = "1.0.0"
+description = "RAG sobre Myelin: recuperacao, chunk store, montagem de contexto e busca vetorial"
+
+[build.graph.embedder-graph]
+namespace = "rag"
+toolchain = "cpp"
+sources = ["src/rag/embedder/nn.cpp", "src/rag/embedder/package.cpp"]
+exports = ["embedder"]
+
+[build.orchestration.orchestration]
+toolchain = "cpp"
+sources = [
+    "src/rag/embedder/entrypoint.cpp",
+    "src/rag/embedder/orchestration.cpp",
+    "src/rag/embedder/nn.cpp",
+]
+
+[build.orchestration.augmentation]
+toolchain = "cpp"
+sources = [
+    "src/rag/hook_entrypoint.cpp",
+    "src/rag/runtime_hook.cpp",
+    "src/rag/context_builder.cpp",
+    "src/rag/chunk.cpp",
+    "src/rag/embedder/nn.cpp",
+]
+
+[build.native.embedder-tokenizer]
+toolchain = "cpp"
+sources = ["src/rag/embedder/tokenizer_native.cpp"]
+libraries = ["utf8proc"]
+
+[build.native.turbovec-crate]
+toolchain = "rust"
+artifact = "libturbovec_myelin.a"
+sources = ["src/rag/turbovec/Cargo.toml"]
+
+[build.native.turbovec]
+toolchain = "cpp"
+sources = ["src/rag/turbovec_native.cpp"]
+uses = ["turbovec-crate"]
+libraries = ["turbovec_myelin", "pthread", "dl", "m"]
+
+[build.native.search]
+toolchain = "cpp"
+sources = ["src/rag/search_native.cpp"]
+libraries = ["curl"]
+
+[capabilities]
+provides = ["embedder", "multilingual-embedder", "vector-index", "dense-retriever"]
+
+[package.variables]
+top_k = { type = "uint32", default = 5, define = "RAG_TOP_K", facets = ["augmentation"] }
+bit_width = { type = "uint32", default = 4 }
+context_budget = { type = "uint32", default = 2200, define = "RAG_CONTEXT_BUDGET", facets = ["augmentation"] }
+minimum_similarity = { type = "float", default = 0.2, define = "RAG_MINIMUM_SIMILARITY", facets = ["augmentation"] }
+require_lexical_match = { type = "bool", default = true, define = "RAG_REQUIRE_LEXICAL_MATCH", facets = ["augmentation"] }
